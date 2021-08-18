@@ -33,7 +33,11 @@ if USE_SERVICE_ACCOUNTS:
 TELEGRAPHLIMIT = 80
 
 class GoogleDriveHelper:
-    def __init__(self, name=None, listener=None):
+    def __init__(self,name=None, listener=None,clonesa = None ):
+        
+        if clonesa is not None:
+            global USE_SERVICE_ACCOUNTS
+            USE_SERVICE_ACCOUNTS = clonesa
         self.__G_DRIVE_TOKEN_FILE = "token.pickle"
         # Check https://developers.google.com/drive/scopes for all available scopes
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']

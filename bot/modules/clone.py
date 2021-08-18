@@ -10,11 +10,11 @@ import random
 import string
 
 
-def cloneNode(update, context):
+def cloneNode(update, context, sa):
     args = update.message.text.split(" ", maxsplit=1)
     if len(args) > 1:
         link = args[1]
-        gd = gdriveTools.GoogleDriveHelper()
+        gd = gdriveTools.GoogleDriveHelper(clonesa=sa)
         res, size, name, files = gd.clonehelper(link)
         if res != "":
             sendMessage(res, context.bot, update)
@@ -37,7 +37,7 @@ def cloneNode(update, context):
             result, button = gd.clone(link)
             deleteMessage(context.bot, msg)
         else:
-            drive = gdriveTools.GoogleDriveHelper(name)
+            drive = gdriveTools.GoogleDriveHelper(clonesa=sa,name=name)
             gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=12))
             clone_status = CloneStatus(drive, size, update, gid)
             with download_dict_lock:
@@ -70,5 +70,13 @@ def cloneNode(update, context):
     else:
         sendMessage('Provide G-Drive Shareable Link to Clone.', context.bot, update)
 
-clone_handler = CommandHandler(BotCommands.CloneCommand, cloneNode, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+def clone(update,context):
+    cloneNode(update,context,False)
+
+def cloneSA(update,context):
+    cloneNode(update,context,True)
+
+clone_handler = CommandHandler(BotCommands.CloneCommand, clone, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
+clonesa_handler = CommandHandler(BotCommands.CloneSACommand, cloneSA, filters=CustomFilters.authorized_chat | CustomFilters.authorized_user, run_async=True)
 dispatcher.add_handler(clone_handler)
+dispatcher.add_handler(clonesa_handler)
