@@ -49,14 +49,12 @@ This bot can mirror all your links to Google Drive!
 Type /{BotCommands.HelpCommand} to get a list of available commands
 '''
     buttons = button_build.ButtonMaker()
-    buttons.buildbutton("Repo", "https://github.com/breakdowns/slam-mirrorbot")
+    buttons.buildbutton("Repo", "https://github.com/SlamDevs/slam-mirrorbot")
     buttons.buildbutton("Channel", "https://t.me/SlamMirrorUpdates")
     reply_markup = InlineKeyboardMarkup(buttons.build_menu(2))
-    LOGGER.info('UID: {} - UN: {} - MSG: {}'.format(update.message.chat.id, update.message.chat.username, update.message.text))
-    uptime = get_readable_time((time.time() - botStartTime))
     if CustomFilters.authorized_user(update) or CustomFilters.authorized_chat(update):
         if update.message.chat.type == "private" :
-            sendMessage(f"Hey I'm Alive 🙂\nSince: <code>{uptime}</code>", context.bot, update)
+            sendMarkup(start_string, context.bot, update, reply_markup)
         else :
             sendMarkup(start_string, context.bot, update, reply_markup)
     else :
@@ -191,8 +189,8 @@ botcmds = [
         (f'{BotCommands.HelpCommand}','Get Detailed Help'),
         (f'{BotCommands.MirrorCommand}', 'Start Mirroring'),
         (f'{BotCommands.TarMirrorCommand}','Start mirroring and upload as .tar'),
-        (f'{BotCommands.UnzipMirrorCommand}','Extract files'),
         (f'{BotCommands.ZipMirrorCommand}','Start mirroring and upload as .zip'),
+        (f'{BotCommands.UnzipMirrorCommand}','Extract files'),
         (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
         (f'{BotCommands.CloneSACommand}','Copy file/folder to Drive using SA'),
         (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
