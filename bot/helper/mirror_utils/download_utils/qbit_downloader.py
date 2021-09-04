@@ -79,8 +79,6 @@ class qbittorrent:
                 return
             gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=14))
             with download_dict_lock:
-                if isinstance(download_dict,NotifyDict):
-                    LOGGER.info("ITS OF TYPE NOTIFY DICT")
                 download_dict[listener.uid] = QbDownloadStatus(gid, listener, self.ext_hash, self.client)
             tor_info = tor_info[0]
             LOGGER.info(f"QbitDownload started: {tor_info.name}")
