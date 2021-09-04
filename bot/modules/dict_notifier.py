@@ -33,8 +33,12 @@ class NotifyDict(dict):
         if not bool(download_dict):
             LOGGER.info("NO DOWNLOADS AVAILABLE")
             if auto_shutdown_handler is None:
+                LOGGER.info("adding schedular")
                 auto_shutdown_handler = setInterval(interval,self.shutdown)
         else:
+            LOGGER.info("Downloads still here")
             if auto_shutdown_handler is not None:
+                LOGGER.info("scedular cancelled")
                 auto_shutdown_handler.cancel()
+            LOGGER.info("schedular set to None")
             auto_shutdown_handler = None
