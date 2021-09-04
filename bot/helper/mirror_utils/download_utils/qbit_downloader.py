@@ -79,6 +79,7 @@ class qbittorrent:
             gid = ''.join(random.SystemRandom().choices(string.ascii_letters + string.digits, k=14))
             with download_dict_lock:
                 download_dict[listener.uid] = QbDownloadStatus(gid, listener, self.ext_hash, self.client)
+                LOGGER.info("ADDED QBIT DOWNLOAD TO DOWNLOAD_DICT")
             tor_info = tor_info[0]
             LOGGER.info(f"QbitDownload started: {tor_info.name}")
             self.updater = setInterval(self.update_interval, self.update)
