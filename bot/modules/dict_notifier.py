@@ -1,5 +1,5 @@
 from bot.helper.ext_utils.bot_utils import setInterval
-from bot import auto_shutdown_handler,download_dict_lock, download_dict, LOGGER
+from bot import auto_shutdown_handler, download_dict, LOGGER
 
 class NotifyDict(dict):
 
