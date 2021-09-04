@@ -4,12 +4,14 @@ from bot import auto_shutdown_handler, download_dict, LOGGER
 class NotifyDict(dict):
 
     def __init__(self, *args, **kwargs):
+        LOGGER.info("INIT")
         self.check_if_autoshutdown_possible(60)
         dict.__init__(self, *args, **kwargs)
 
     def _wrap(method):
         def wrapper(self, *args, **kwargs):
             result = method(self, *args, **kwargs)
+            LOGGER.info("wrap")
             self.check_if_autoshutdown_possible(30)
             return result
         return wrapper
