@@ -1,5 +1,5 @@
 from bot.helper.ext_utils.bot_utils import setInterval
-from bot import auto_shutdown_handler, download_dict, LOGGER
+from bot import auto_shutdown_handler,download_dict_lock, download_dict, LOGGER
 
 class NotifyDict(dict):
 
@@ -25,20 +25,22 @@ class NotifyDict(dict):
     copy =  _wrap(dict.copy)
 
     def shutdown(self):
-        if not bool(download_dict):
-            LOGGER.info("Shutting down worker to save dyno hours")
+        with download_dict_lock:
+            if not bool(download_dict):
+                LOGGER.info("Shutting down worker to save dyno hours")
 
     def check_if_autoshutdown_possible(self,interval):
-        global auto_shutdown_handler
-        if not bool(download_dict):
-            LOGGER.info("NO DOWNLOADS AVAILABLE")
-            if auto_shutdown_handler is None:
-                LOGGER.info("adding schedular")
-                auto_shutdown_handler = setInterval(interval,self.shutdown)
-        else:
-            LOGGER.info("Downloads still here")
-            if auto_shutdown_handler is not None:
-                LOGGER.info("scedular cancelled")
-                auto_shutdown_handler.cancel()
-            LOGGER.info("schedular set to None")
-            auto_shutdown_handler = None
+        with download_dict_lock:
+            global auto_shutdown_handler
+            if not bool(download_dict):
+                LOGGER.info("NO DOWNLOADS AVAILABLE")
+                if auto_shutdown_handler is None:
+                    LOGGER.info("adding schedular")
+                    auto_shutdown_handler = setInterval(interval,self.shutdown)
+            else:
+                LOGGER.info("Downloads still here")
+                if auto_shutdown_handler is not None:
+                    LOGGER.info("scedular cancelled")
+                    auto_shutdown_handler.cancel()
+                LOGGER.info("schedular set to None")
+                auto_shutdown_handler = None
