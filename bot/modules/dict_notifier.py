@@ -1,3 +1,5 @@
+import threading
+import time
 from bot import auto_shutdown_handler, LOGGER
 
 class setInterval:
