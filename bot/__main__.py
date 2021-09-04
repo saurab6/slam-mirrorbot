@@ -21,6 +21,7 @@ from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clon
 from .modules.dict_notifier import NotifyDict
 
 download_dict = NotifyDict()
+LOGGER.info("download_dict set to NotifyDict()")
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
     total, used, free = shutil.disk_usage('.')
