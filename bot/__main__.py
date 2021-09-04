@@ -3,6 +3,10 @@ import signal
 import os
 import asyncio
 
+from bot.modules.dict_notifier import NotifyDict
+from bot import changeDownloadDict
+changeDownloadDict(NotifyDict())
+
 from pyrogram import idle
 from bot import app, alive
 from sys import executable
