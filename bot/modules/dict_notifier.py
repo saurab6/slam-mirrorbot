@@ -25,12 +25,12 @@ class NotifyDict(dict):
     copy =  _wrap(dict.copy)
 
     def shutdown(self):
-        if not bool(download_dict):
+        if not bool(self):
             LOGGER.info("Shutting down worker to save dyno hours")
 
     def check_if_autoshutdown_possible(self,interval):
         global auto_shutdown_handler
-        if not bool(download_dict):
+        if not bool(self):
             LOGGER.info("NO DOWNLOADS AVAILABLE")
             if auto_shutdown_handler is None:
                 LOGGER.info("adding schedular")
