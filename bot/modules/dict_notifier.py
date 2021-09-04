@@ -4,13 +4,13 @@ from bot import auto_shutdown_handler, download_dict, LOGGER
 class NotifyDict(dict):
 
     def __init__(self, *args, **kwargs):
-        self.check_if_autoshutdown_possible(60)
+        self.check_if_autoshutdown_possible(20)
         dict.__init__(self, *args, **kwargs)
 
     def _wrap(method):
         def wrapper(self, *args, **kwargs):
             result = method(self, *args, **kwargs)
-            self.check_if_autoshutdown_possible(30)
+            self.check_if_autoshutdown_possible(10)
             return result
         return wrapper
     __delitem__ = _wrap(dict.__delitem__)
