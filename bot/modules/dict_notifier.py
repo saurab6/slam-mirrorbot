@@ -7,22 +7,32 @@ class NotifyDict(dict):
         LOGGER.info("INIT")
         self.check_if_autoshutdown_possible(60)
         dict.__init__(self, *args, **kwargs)
+    
+    def __setitem__(self, *args, **kwargs):
+        dict.__setitem__(self, *args, **kwargs)
+        LOGGER.info("wrap")
+        self.check_if_autoshutdown_possible(30)
 
-    def _wrap(method):
-        def wrapper(self, *args, **kwargs):
-            result = method(self, *args, **kwargs)
-            LOGGER.info("wrap")
-            self.check_if_autoshutdown_possible(30)
-            return result
-        return wrapper
-    __delitem__ = _wrap(dict.__delitem__)
-    __setitem__ = _wrap(dict.__setitem__)
-    clear = _wrap(dict.clear)
-    pop = _wrap(dict.pop)
-    popitem = _wrap(dict.popitem)
-    setdefault = _wrap(dict.setdefault)
-    update =  _wrap(dict.update)
-    copy =  _wrap(dict.copy)
+    def __delitem__(self, *args, **kwargs):
+        dict.__delitem__(self, *args, **kwargs)
+        LOGGER.info("wrap")
+        self.check_if_autoshutdown_possible(30)
+
+    # def _wrap(method):
+    #     def wrapper(self, *args, **kwargs):
+    #         result = method(self, *args, **kwargs)
+    #         LOGGER.info("wrap")
+    #         self.check_if_autoshutdown_possible(30)
+    #         return result
+    #     return wrapper
+    # __delitem__ = _wrap(dict.__delitem__)
+    # __setitem__ = _wrap(dict.__setitem__)
+    # clear = _wrap(dict.clear)
+    # pop = _wrap(dict.pop)
+    # popitem = _wrap(dict.popitem)
+    # setdefault = _wrap(dict.setdefault)
+    # update =  _wrap(dict.update)
+    # copy =  _wrap(dict.copy)
 
     def shutdown(self):
         if not bool(download_dict):
