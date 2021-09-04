@@ -3,6 +3,10 @@ import signal
 import os
 import asyncio
 
+from bot.modules.dict_notifier import NotifyDict
+
+changeDownloadDict(NotifyDict())
+
 from pyrogram import idle
 from bot import app, alive
 from sys import executable
@@ -18,9 +22,7 @@ from .helper.ext_utils.bot_utils import get_readable_file_size, get_readable_tim
 from .helper.telegram_helper.filters import CustomFilters
 from bot.helper.telegram_helper import button_build
 from .modules import authorize, list, cancel_mirror, mirror_status, mirror, clone, watch, shell, eval, delete, speedtest, count, reboot
-from bot.modules.dict_notifier import NotifyDict
 
-changeDownloadDict(NotifyDict())
 
 def stats(update, context):
     currentTime = get_readable_time(time.time() - botStartTime)
