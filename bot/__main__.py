@@ -4,10 +4,8 @@ import os
 import asyncio
 
 from bot.modules.dict_notifier import NotifyDict
-from bot import bot, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT,download_dict
-with download_dict_lock:
-    download_dict = NotifyDict()
-    LOGGER.info("Download Dict set to NotifyDict")
+from bot import changeDownloadDict
+changeDownloadDict(NotifyDict)
 
 from pyrogram import idle
 from bot import app, alive
@@ -16,6 +14,7 @@ from sys import executable
 from telegram import ParseMode
 from telegram.ext import CommandHandler
 from wserver import start_server_async
+from bot import bot, dispatcher, updater, botStartTime, IGNORE_PENDING_REQUESTS, IS_VPS, SERVER_PORT
 from bot.helper.ext_utils import fs_utils
 from bot.helper.telegram_helper.bot_commands import BotCommands
 from bot.helper.telegram_helper.message_utils import *

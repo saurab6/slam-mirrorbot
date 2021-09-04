@@ -413,3 +413,9 @@ if os.path.exists('drive_folder'):
 updater = tg.Updater(token=BOT_TOKEN)
 bot = updater.bot
 dispatcher = updater.dispatcher
+
+def changeDownloadDict(obj):
+    global download_dict
+    with download_dict_lock:
+        download_dict = obj
+        LOGGER.info("Download Dict set to NotifyDict")
