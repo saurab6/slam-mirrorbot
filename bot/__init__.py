@@ -53,6 +53,8 @@ subprocess.run(["cp", "qBittorrent.conf", "qBittorrent/config/qBittorrent.conf"]
 subprocess.run(["qbittorrent-nox", "-d", "--profile=."])
 
 Interval = []
+auto_shutdown_handler = None
+
 DRIVES_NAMES = []
 DRIVES_IDS = []
 INDEX_URLS = []
