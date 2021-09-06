@@ -1,6 +1,6 @@
 import threading
 import time
-from bot import auto_shutdown_handler, LOGGER, HEROKU_API_KEY, HEROKU_APP_NAME
+from bot import auto_shutdown_handler, LOGGER, HEROKU_API_KEY, HEROKU_APP_NAME, AUTO_SHUTDOWN_INTERVAL, AUTO_SHUTDOWN
 import heroku3
 
 class setInterval:
@@ -24,18 +24,25 @@ class NotifyDict(dict):
 
     def __init__(self, *args, **kwargs):
         LOGGER.info("INIT")
-        LOGGER.info(HEROKU_APP_NAME)
-        LOGGER.info(HEROKU_API_KEY)
-        self.heroku_connect = heroku3.from_key(HEROKU_API_KEY)
-        self.heroku_app = self.heroku_connect.apps()[HEROKU_APP_NAME]
-        self.check_if_autoshutdown_possible(60)
+        if AUTO_SHUTDOWN and AUTO_SHUTDOWN_INTERVAL is not None:
+            self.heroku_app = None
+            self.heroku_connect = None
+            try:
+                self.heroku_connect = heroku3.from_key(HEROKU_API_KEY)
+                self.heroku_app = self.heroku_connect.apps()[HEROKU_APP_NAME]
+                LOGGER.info("Connected to heroku account successfully")
+            except:
+                LOGGER.info("Can't Connect to heroku account. Please check your heroku credentials")
+                LOGGER.info("Without heroku credentials, AutoShutDown will not work")
+            if self.heroku_app is not None:
+                self.check_if_autoshutdown_possible(AUTO_SHUTDOWN_INTERVAL)
         dict.__init__(self, *args, **kwargs)
     
     def _wrap(method):
         def wrapper(self, *args, **kwargs):
             result = method(self, *args, **kwargs)
-            LOGGER.info("wrap")
-            self.check_if_autoshutdown_possible(30)
+            if AUTO_SHUTDOWN and AUTO_SHUTDOWN_INTERVAL is not None and self.heroku_app is not None:
+                self.check_if_autoshutdown_possible(AUTO_SHUTDOWN_INTERVAL)
             return result
         return wrapper
     __delitem__ = _wrap(dict.__delitem__)
@@ -48,8 +55,8 @@ class NotifyDict(dict):
     copy =  _wrap(dict.copy)
 
     def shutdown(self):
-        if not bool(self):
-            LOGGER.info("Shutting down worker to save dyno hours")
+        if not bool(self) and AUTO_SHUTDOWN and AUTO_SHUTDOWN_INTERVAL is not None and self.heroku_app is not None:
+            LOGGER.info("Shutting down to save dyno hours")
             for p in self.heroku_app.process_formation():
                 p.scale(0)
 
@@ -58,12 +65,12 @@ class NotifyDict(dict):
         if not bool(self):
             LOGGER.info("NO DOWNLOADS AVAILABLE")
             if auto_shutdown_handler is None:
-                LOGGER.info("adding schedular")
                 auto_shutdown_handler = setInterval(interval,self.shutdown)
+                LOGGER.info("Added Scheduler")
         else:
-            LOGGER.info("Downloads still here")
+            LOGGER.info("Downloads are present")
             if auto_shutdown_handler is not None:
-                LOGGER.info("scedular cancelled")
                 auto_shutdown_handler.cancel()
-            LOGGER.info("schedular set to None")
+                LOGGER.info("Scheduler cancelled")
             auto_shutdown_handler = None
+            LOGGER.info("Scheduler set to None")

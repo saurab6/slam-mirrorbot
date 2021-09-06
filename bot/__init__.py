@@ -396,6 +396,21 @@ try:
 except KeyError:
     pass
 
+try:
+    AUTO_SHUTDOWN_INTERVAL = getConfig('AUTO_SHUTDOWN_INTERVAL')
+    if len(AUTO_SHUTDOWN_INTERVAL) == 0:
+        raise KeyError
+    else:
+        AUTO_SHUTDOWN_INTERVAL = int(getConfig('AUTO_SHUTDOWN_INTERVAL')) * 60
+except KeyError:
+    AUTO_SHUTDOWN_INTERVAL = None
+
+try:
+    AUTO_SHUTDOWN = getConfig('AUTO_SHUTDOWN')
+    AUTO_SHUTDOWN = AUTO_SHUTDOWN.lower() == 'true'
+except KeyError:
+    AUTO_SHUTDOWN = False
+
 DRIVES_NAMES.append("Main")
 DRIVES_IDS.append(parent_id)
 if os.path.exists('drive_folder'):
