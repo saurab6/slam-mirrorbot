@@ -24,6 +24,8 @@ class NotifyDict(dict):
 
     def __init__(self, *args, **kwargs):
         LOGGER.info("INIT")
+        LOGGER.info(HEROKU_APP_NAME)
+        LOGGER.info(HEROKU_API_KEY)
         self.heroku_connect = heroku3.from_key(HEROKU_API_KEY)
         self.heroku_app = self.heroku_connect.apps()[HEROKU_APP_NAME]
         self.check_if_autoshutdown_possible(60)
