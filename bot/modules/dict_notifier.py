@@ -1,6 +1,7 @@
 import threading
 import time
-from bot import auto_shutdown_handler, LOGGER
+from bot import auto_shutdown_handler, LOGGER, HEROKU_API_KEY, HEROKU_APP_NAME
+import heroku3
 
 class setInterval:
     def __init__(self, interval, action):
@@ -23,6 +24,8 @@ class NotifyDict(dict):
 
     def __init__(self, *args, **kwargs):
         LOGGER.info("INIT")
+        self.heroku_connect = heroku3.from_key(HEROKU_API_KEY)
+        self.heroku_app = self.heroku_connect.apps()[HEROKU_APP_NAME]
         self.check_if_autoshutdown_possible(60)
         dict.__init__(self, *args, **kwargs)
     
@@ -45,6 +48,8 @@ class NotifyDict(dict):
     def shutdown(self):
         if not bool(self):
             LOGGER.info("Shutting down worker to save dyno hours")
+            for p in self.heroku_app.process_formation():
+                p.scale(0)
 
     def check_if_autoshutdown_possible(self,interval):
         global auto_shutdown_handler
