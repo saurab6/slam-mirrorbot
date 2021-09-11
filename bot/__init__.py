@@ -55,6 +55,8 @@ subprocess.run(["mkdir", "-p", "qBittorrent/config"])
 subprocess.run(["cp", "qBittorrent.conf", "qBittorrent/config/qBittorrent.conf"])
 subprocess.run(["qbittorrent-nox", "-d", "--profile=."])
 Interval = []
+auto_shutdown_handler = None
+
 DRIVES_NAMES = []
 DRIVES_IDS = []
 INDEX_URLS = []
@@ -378,6 +380,21 @@ try:
 except KeyError:
     pass
 
+try:
+    AUTO_SHUTDOWN_INTERVAL = getConfig('AUTO_SHUTDOWN_INTERVAL')
+    if len(AUTO_SHUTDOWN_INTERVAL) == 0:
+        raise KeyError
+    else:
+        AUTO_SHUTDOWN_INTERVAL = int(getConfig('AUTO_SHUTDOWN_INTERVAL')) * 60
+except KeyError:
+    AUTO_SHUTDOWN_INTERVAL = None
+
+try:
+    AUTO_SHUTDOWN = getConfig('AUTO_SHUTDOWN')
+    AUTO_SHUTDOWN = AUTO_SHUTDOWN.lower() == 'true'
+except KeyError:
+    AUTO_SHUTDOWN = False
+
 DRIVES_NAMES.append("Main")
 DRIVES_IDS.append(parent_id)
 if os.path.exists('drive_folder'):
@@ -398,3 +415,9 @@ if os.path.exists('drive_folder'):
 updater = tg.Updater(token=BOT_TOKEN)
 bot = updater.bot
 dispatcher = updater.dispatcher
+
+def changeDownloadDict(obj):
+    global download_dict
+    with download_dict_lock:
+        download_dict = obj
+        LOGGER.info("Download Dict set to NotifyDict")
