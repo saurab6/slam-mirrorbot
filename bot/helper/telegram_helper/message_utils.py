@@ -10,7 +10,6 @@ from telegram.error import TimedOut, BadRequest
 
 
 def sendMessage(text: str, bot, update: Update):
-    LOGGER.info(update.message.chat_id)
     try:
         return bot.send_message(update.message.chat_id,
                             reply_to_message_id=update.message.message_id,

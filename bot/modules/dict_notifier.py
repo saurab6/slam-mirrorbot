@@ -1,13 +1,14 @@
 import threading
 import time
-from bot import auto_shutdown_handler, LOGGER, HEROKU_API_KEY, HEROKU_APP_NAME, AUTO_SHUTDOWN_INTERVAL, AUTO_SHUTDOWN
+from bot import bot, OWNER_ID, auto_shutdown_handler, LOGGER, HEROKU_API_KEY, HEROKU_APP_NAME, AUTO_SHUTDOWN_INTERVAL, AUTO_SHUTDOWN
 import heroku3
 
 class setInterval:
-    def __init__(self, interval, action):
+    def __init__(self, interval, action, repeat = True):
         self.interval = interval
         self.action = action
         self.stopEvent = threading.Event()
+        self.repeat = repeat
         thread = threading.Thread(target=self.__setInterval)
         thread.start()
 
@@ -16,6 +17,8 @@ class setInterval:
         while not self.stopEvent.wait(nextTime - time.time()):
             nextTime += self.interval
             self.action()
+            if not self.repeat:
+                break
 
     def cancel(self):
         self.stopEvent.set()
@@ -57,6 +60,7 @@ class NotifyDict(dict):
     def shutdown(self):
         if not bool(self) and AUTO_SHUTDOWN and AUTO_SHUTDOWN_INTERVAL is not None and self.heroku_app is not None:
             LOGGER.info("Shutting down to save dyno hours")
+            bot.send_message(chat_id=OWNER_ID,text="Shutting down to save dyno hours")
             for p in self.heroku_app.process_formation():
                 p.scale(0)
 
@@ -65,7 +69,7 @@ class NotifyDict(dict):
         if not bool(self):
             LOGGER.info("NO DOWNLOADS AVAILABLE")
             if auto_shutdown_handler is None:
-                auto_shutdown_handler = setInterval(interval,self.shutdown)
+                auto_shutdown_handler = setInterval(interval,self.shutdown,repeat=False)
                 LOGGER.info("Added Scheduler")
         else:
             LOGGER.info("Downloads are present")
