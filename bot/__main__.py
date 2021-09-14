@@ -4,7 +4,7 @@ import os
 import asyncio
 
 from bot.modules.dict_notifier import NotifyDict
-from bot import changeDownloadDict
+from bot import OWNER_ID, changeDownloadDict
 changeDownloadDict(NotifyDict())
 
 from pyrogram import idle
@@ -257,6 +257,7 @@ def main():
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
     updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
+    bot.send_message(chat_id=OWNER_ID,text="Bot Started")
     LOGGER.info("Bot Started!")
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
 
