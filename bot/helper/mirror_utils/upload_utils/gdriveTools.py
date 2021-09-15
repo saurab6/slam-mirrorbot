@@ -22,8 +22,8 @@ from tenacity import *
 from telegram import InlineKeyboardMarkup
 from bot.helper.telegram_helper import button_build
 from telegraph import Telegraph
-from bot import ACCOUNTS_ZIP_URL, parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, \
-    USE_SERVICE_ACCOUNTS, telegraph_token, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, BUTTON_SIX_NAME, BUTTON_SIX_URL, SHORTENER, SHORTENER_API, VIEW_LINK, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS
+from bot import parent_id, DOWNLOAD_DIR, IS_TEAM_DRIVE, INDEX_URL, \
+    USE_SERVICE_ACCOUNTS, telegraph_token, BUTTON_FOUR_NAME, BUTTON_FOUR_URL, BUTTON_FIVE_NAME, BUTTON_FIVE_URL, BUTTON_SIX_NAME, BUTTON_SIX_URL, SHORTENER, SHORTENER_API, VIEW_LINK, DRIVES_NAMES, DRIVES_IDS, INDEX_URLS, RECURSIVE_SEARCH
 from bot.helper.ext_utils.bot_utils import get_readable_file_size, setInterval
 from bot.helper.ext_utils.fs_utils import get_mime_type, get_path_size
 from bot.helper.ext_utils.shortenurl import short_url
@@ -34,22 +34,13 @@ logging.getLogger('googleapiclient.discovery').setLevel(logging.ERROR)
 if USE_SERVICE_ACCOUNTS:
     SERVICE_ACCOUNT_INDEX = randrange(len(os.listdir("accounts")))
 
-TELEGRAPHLIMIT = 80
+TELEGRAPHLIMIT = 70
 
 
 class GoogleDriveHelper:
 
 
-    def __init__(self, name=None, listener=None, clonesa = None):
-
-        global USE_SERVICE_ACCOUNTS		
-        if clonesa is not None:		
-            USE_SERVICE_ACCOUNTS = clonesa		
-        elif ACCOUNTS_ZIP_URL is not None:		
-            USE_SERVICE_ACCOUNTS = True		
-        else:		
-            USE_SERVICE_ACCOUNTS = False 
-
+    def __init__(self, name=None, listener=None):
         self.__G_DRIVE_TOKEN_FILE = "token.pickle"
         # Check https://developers.google.com/drive/scopes for all available scopes
         self.__OAUTH_SCOPE = ['https://www.googleapis.com/auth/drive']
@@ -609,34 +600,91 @@ class GoogleDriveHelper:
             str = str.replace(char, ' ')
         return str
 
+    def get_recursive_list(self, file, rootid = "root"):
+        rtnlist = []
+        if not rootid:
+            rootid = file.get('teamDriveId')
+        if rootid == "root":
+            rootid = self.__service.files().get(fileId = 'root', fields="id").execute().get('id')
+        x = file.get("name")
+        y = file.get("id")
+        while(y != rootid):
+            rtnlist.append(x)
+            file = self.__service.files().get(
+                                            fileId=file.get("parents")[0],
+                                            supportsAllDrives=True,
+                                            fields='id, name, parents'
+                                            ).execute()
+            x = file.get("name")
+            y = file.get("id")
+        rtnlist.reverse()
+        return rtnlist
 
     def drive_query(self, parent_id, fileName):
-        # Create Search Query for API request.
-        if self.stopDup:
-            query = f"'{parent_id}' in parents and name = '{fileName}' and "
+        if RECURSIVE_SEARCH:
+            if self.stopDup:
+                query = f"name = '{fileName}' and "
+            else:
+                fileName = fileName.split(' ')
+                query = "".join(
+                    f"name contains '{name}' and "
+                    for name in fileName
+                    if name != ''
+                )
+
+            query += "trashed = false"
+            if parent_id == "root":
+                return (
+                    self.__service.files()
+                    .list(q=query + " and 'me' in owners",
+                        pageSize=100,
+                        spaces='drive',
+                        fields='files(id, name, mimeType, size, parents)',
+                        orderBy='folder, name asc'
+                    )
+                    .execute()
+                )
+            else:
+                return (
+                    self.__service.files()
+                    .list(supportsTeamDrives=True,
+                        includeTeamDriveItems=True,
+                        teamDriveId=parent_id,
+                        q=query,
+                        corpora='drive',
+                        spaces='drive',
+                        pageSize=100,
+                        fields='files(id, name, mimeType, size, teamDriveId, parents)',
+                        orderBy='folder, name asc'
+                    )
+                    .execute()
+                )
         else:
-            query = f"'{parent_id}' in parents and "
-            fileName = fileName.split(' ')
-            for name in fileName:
-                if name != '':
-                    query += f"name contains '{name}' and "
-        query += "trashed = false"
-        return (
-            self.__service.files()
-            .list(
-                supportsTeamDrives=True,
-                includeTeamDriveItems=True,
-                q=query,
-                spaces='drive',
-                pageSize=200,
-                fields='files(id, name, mimeType, size)',
-                orderBy='name asc',
+            if self.stopDup:
+                query = f"'{parent_id}' in parents and name = '{fileName}' and "
+            else:
+                query = f"'{parent_id}' in parents and "
+                fileName = fileName.split(' ')
+                for name in fileName:
+                    if name != '':
+                        query += f"name contains '{name}' and "
+            query += "trashed = false"
+            return (
+                self.__service.files()
+                .list(
+                    supportsTeamDrives=True,
+                    includeTeamDriveItems=True,
+                    q=query,
+                    spaces='drive',
+                    pageSize=200,
+                    fields='files(id, name, mimeType, size)',
+                    orderBy='folder, name asc',
+                )
+                .execute()
             )
-            .execute()
-        )
 
 
-    def drive_list(self, fileName, stopDup=False):
+    def drive_list(self, fileName, stopDup=False, clone=False):
         self.stopDup = stopDup
         msg = ""
         if not stopDup:
@@ -663,7 +711,10 @@ class GoogleDriveHelper:
                     else:
                         msg += f"<b><a href={furl}>Drive Link</a></b>"
                     if INDEX_URLS[index] is not None:
-                        url_path = requests.utils.quote(f'{file.get("name")}')
+                        if RECURSIVE_SEARCH:
+                            url_path = "/".join([requests.utils.quote(n, safe='') for n in self.get_recursive_list(file, parent_id)])
+                        else:
+                            url_path = requests.utils.quote(f'{file.get("name")}')
                         url = f'{INDEX_URLS[index]}/{url_path}/'
                         if SHORTENER is not None and SHORTENER_API is not None:
                             siurl = short_url(url)
@@ -683,7 +734,14 @@ class GoogleDriveHelper:
                     else:
                         msg += f"<b><a href={furl}>Drive Link</a></b>"
                     if INDEX_URLS[index] is not None:
-                        url_path = requests.utils.quote(f'{file.get("name")}')
+                        if RECURSIVE_SEARCH:
+                            url_path = "/".join(
+                                requests.utils.quote(n, safe='')
+                                for n in self.get_recursive_list(file, parent_id)
+                            )
+
+                        else:
+                            url_path = requests.utils.quote(f'{file.get("name")}')
                         url = f'{INDEX_URLS[index]}/{url_path}'
                         urls = f'{INDEX_URLS[index]}/{url_path}?a=view'
                         if SHORTENER is not None and SHORTENER_API is not None:
@@ -703,6 +761,8 @@ class GoogleDriveHelper:
                     self.telegraph_content.append(msg)
                     msg = ""
                     content_count = 0
+                if clone:
+                    break
 
         if msg != '':
             self.telegraph_content.append(msg)
