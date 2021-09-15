@@ -3,6 +3,10 @@ import signal
 import os
 import asyncio
 
+from bot.modules.dict_notifier import NotifyDict
+from bot import OWNER_ID, changeDownloadDict
+changeDownloadDict(NotifyDict())
+
 from pyrogram import idle
 from sys import executable
 
@@ -108,6 +112,9 @@ def bot_help(update, context):
 <br><br>
 <b>/{BotCommands.CloneCommand}</b> [drive_url]: Copy file/folder to Google Drive
 <br><br>
+<br><br>
+<b>/{BotCommands.CloneSACommand}</b> [drive_url]: Copy file/folder to Google Drive using Service Accounts
+<br><br>
 <b>/{BotCommands.CountCommand}</b> [drive_url]: Count file/folder of Google Drive Links
 <br><br>
 <b>/{BotCommands.DeleteCommand}</b> [drive_url]: Delete file from Google Drive (Only Owner & Sudo)
@@ -173,6 +180,7 @@ botcmds = [
         (f'{BotCommands.QbZipMirrorCommand}','Start mirroring and upload as .zip using qb'),
         (f'{BotCommands.QbUnzipMirrorCommand}','Extract files using qBitorrent'),
         (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
+        (f'{BotCommands.CloneSACommand}','Copy file/folder to Drive using SA'),
         (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
         (f'{BotCommands.DeleteCommand}','Delete file from Drive'),
         (f'{BotCommands.WatchCommand}','Mirror Youtube-dl support link'),
@@ -227,6 +235,7 @@ def main():
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
     updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
+    bot.send_message(chat_id=OWNER_ID,text="Bot Started")
     LOGGER.info("Bot Started!")
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
 
