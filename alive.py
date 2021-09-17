@@ -2,7 +2,6 @@
 # (c) https://github.com/SlamDevs/slam-mirrorbot
 # All rights reserved
 
-from bot.__main__ import log
 import time
 import requests
 import os
