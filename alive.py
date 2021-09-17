@@ -20,7 +20,7 @@ try:
 except:
     BASE_URL = None
 PORT = os.environ.get('PORT', None)
-print(PORT)
+print(str(PORT))
 print("checking")
 if PORT is not None and BASE_URL is not None:
     while True:
