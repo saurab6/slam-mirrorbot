@@ -2,11 +2,18 @@
 # (c) https://github.com/SlamDevs/slam-mirrorbot
 # All rights reserved
 
+from bot.__main__ import log
 import time
 import requests
 import os
+import logging
 
-BASE_URL = os.environ.get('BASE_URL_OF_BOT', None)
+logging.info("GETTING BASE URL")
+try:
+    BASE_URL = os.environ.get('BASE_URL_OF_BOT', None)
+    logging.info(BASE_URL)
+except Exception:
+    logging.info("ERROR WHILE GETTING BASE_URL")
 try:
     if len(BASE_URL) == 0:
         BASE_URL = None
