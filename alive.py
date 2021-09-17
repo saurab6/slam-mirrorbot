@@ -24,5 +24,5 @@ print("checking")
 if PORT is not None and BASE_URL is not None:
     while True:
         print("OHH YEAH")
-        time.sleep(600)
+        time.sleep(10)
         status = requests.get(BASE_URL).status_code
