@@ -210,6 +210,15 @@ botcmds = [
         (f'{BotCommands.QbTarMirrorCommand}','Start mirroring and upload as .tar using qb'),
         (f'{BotCommands.QbZipMirrorCommand}','Start mirroring and upload as .zip using qb'),
         (f'{BotCommands.QbUnzipMirrorCommand}','Extract files using qBitorrent'),
+        (f'{BotCommands.LeechCommand}','Start leeching to Telegram'),
+        (f'{BotCommands.TarLeechCommand}','Start leeching to Telegram and upload it as .tar'),
+        (f'{BotCommands.ZipLeechCommand}','Start leeching to Telegram and upload it as .zip'),
+        (f'{BotCommands.UnzipLeechCommand}','Start leeching to Telegram and extracts it to Telegram'),
+        (f'{BotCommands.TarLeechCommand}',' Start leeching to Telegram and upload it as .tar'),
+        (f'{BotCommands.QbLeechCommand}','Start leeching to Telegram using qBittorrent'),
+        (f'{BotCommands.QbTarLeechCommand}','Start leeching to Telegram using qBittorrent and upload it as .tar'),
+        (f'{BotCommands.QbZipLeechCommand}','Start leeching to Telegram using qBittorrent and upload it as zip'),
+        (f'{BotCommands.QbUnzipLeechCommand}','Start leeching to Telegram using qBittorrent and extract it to telegram'),
         (f'{BotCommands.CloneCommand}','Copy file/folder to Drive'),
         (f'{BotCommands.CloneSACommand}','Copy file/folder to Drive using SA'),
         (f'{BotCommands.CountCommand}','Count file/folder of Drive link'),
@@ -217,6 +226,11 @@ botcmds = [
         (f'{BotCommands.WatchCommand}','Mirror Youtube-dl support link'),
         (f'{BotCommands.TarWatchCommand}','Mirror Youtube playlist link as .tar'),
         (f'{BotCommands.ZipWatchCommand}','Mirror Youtube playlist link as .zip'),
+        (f'{BotCommands.LeechWatchCommand}','Leech through youtube-dl'),
+        (f'{BotCommands.LeechTarWatchCommand}','Leech through youtube-dl and tar before uploading'),
+        (f'{BotCommands.LeechZipWatchCommand}','Leech through youtube-dl and zip before uploading'),
+        (f'{BotCommands.LeechSetCommand}','Leech Settings'),
+        (f'{BotCommands.SetThumbCommand}','Reply photo to set it as Thumbnail'),
         (f'{BotCommands.CancelMirror}','Cancel a task'),
         (f'{BotCommands.CancelAllCommand}','Cancel all tasks'),
         (f'{BotCommands.ListCommand}','Searches files in Drive'),
@@ -241,7 +255,7 @@ def main():
         os.remove(".restartmsg")
     elif OWNER_ID:
         try:
-            text = "<b>Bot Restarted!</b>"
+            text = "<b>Bot Started!</b>"
             bot.sendMessage(chat_id=OWNER_ID, text=text, parse_mode=ParseMode.HTML)
             if AUTHORIZED_CHATS:
                 for i in AUTHORIZED_CHATS:
@@ -266,7 +280,6 @@ def main():
     dispatcher.add_handler(stats_handler)
     dispatcher.add_handler(log_handler)
     updater.start_polling(drop_pending_updates=IGNORE_PENDING_REQUESTS)
-    bot.send_message(chat_id=OWNER_ID,text="Bot Started")
     LOGGER.info("Bot Started!")
     signal.signal(signal.SIGINT, fs_utils.exit_clean_up)
 
